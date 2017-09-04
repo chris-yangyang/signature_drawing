@@ -23,13 +23,14 @@
 
 #include "math_helper.h"
 #include "string_convertor.h"
-
+#include "transformation2D.h"
 using namespace cv;
 using namespace std;
 
 int mbd_gt = 0;//mouse button down for finish current shape labeling
 int lbd_gt = 0;//mouse middle button dow-L lib -Wl,-rpath,'$$ORIGIN/lib'n for selecting edge fragments
 int lbu_gt = 0;
+vector<vector<Point> > vPtSignature;
 
 Point pt_lbd_gt, pt_mv_gt, pt_lbu_gt;//left mouse button down point and mouse move points
 
@@ -37,7 +38,7 @@ Point pt_lbd_gt, pt_mv_gt, pt_lbu_gt;//left mouse button down point and mouse mo
 Point transPoint(0,0);//point for aligntment test, left click to set the translation point.
 double scale=1;//middle click to set the scale.
 double scaleIncremental=0.1;
-double rotation=0;//rotation, defined in degrees. right click mouse and at the same time scroll the middle button.
+double rotation=0;//rotation, defined in degrees. click
 double rotationIncremental=1;
 bool forward=true;
 bool rotationMode=false;
@@ -71,6 +72,14 @@ void printOutDebugging()
   cout<<"rotation:"<<rotation<<endl;
 }
 
+void resetTransformations()
+{
+  transPoint.x=0;
+  transPoint.y=0;
+  scale=0;
+  rotation=0;
+}
+
 void imageCallback(const sensor_msgs::ImageConstPtr& msg)
   {
    try
@@ -88,7 +97,28 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 cv::Mat processOperateImg()
 {
    ros::spinOnce();
-   return recvImg;
+   Mat tmp_img = recvImg.clone();
+   Point relativeTransPoint(0,0);
+   size_t strokesNum=vPtSignature.size();
+   if(strokesNum>0)
+  {
+    relativeTransPoint.x=transPoint.x - vPtSignature[0][0].x;
+    relativeTransPoint.y=transPoint.y - vPtSignature[0][0].y;
+  }
+   transformation2D tf2D(relativeTransPoint,scale, rotation);
+
+   for(int m=0;m<strokesNum;m++)
+   {
+     size_t pointNum=vPtSignature[m].size();
+     for(int n=0;n<pointNum;n++)
+     {
+       Point2d tfPoint=tf2D.doTransformation(vPtSignature[m][n]);
+       cv::circle( tmp_img, tfPoint, 2.0, cv::Scalar( 0, 0, 255 ), 1, 2 );//mark the desired point
+     }
+   }
+
+   //resetTransformations();
+   return tmp_img;
 }
 
 //===========================MAIN FUNCTION START===========================
@@ -136,7 +166,7 @@ int main(int argc, char* argv[]){
      drawRegion.push_back(Point(1,480));
 
 //**************vector for storing signature points*********************
-    vector<vector<Point> > vPtSignature;
+
 
     vector<Point> vPtSigTmp;
 
@@ -198,37 +228,45 @@ int main(int argc, char* argv[]){
         if(27 == keyPress){//"Esc"
            break;
          }
-        if(13==keyPress){//"enter"
-            operationMode=0;
-            cv::destroyWindow("Alignment");
+        if(13==keyPress){//"enter" //send out the points
+            //operationMode=0;
+          //  cv::destroyWindow("Alignment");
+
+          if(vPtSignature.size()==0){
+              cout<<" There is no signature to draw...."<<endl;
+          }else{
+              cout<<" The strokes of signature: "<<vPtSignature.size()<<endl;
+              // operationMode=1;
+              // cv::destroyWindow("Signature");
+              std_msgs::String msg;
+              msg.data = string_convertor::constructPubStr(vPtSignature);
+              pubTask.publish(msg);
+
             continue;
          }
+       }
       else if(32 == keyPress || 1 == mbd_gt || (1 == lbu_gt && pointPolygonTest(resetButtonPts,Point2f(float(pt_lbu_gt.x),float(pt_lbu_gt.y)),false) > 0)){//"space" for re-sign
             lbu_gt = 0;
             mbd_gt = 0;
             vPtSignature.clear();
             vector<vector<Point> >().swap(vPtSignature);
+            std_msgs::String msg;
+            msg.data = "reset";
+            pubTask.publish(msg);
         }else if(1 == lbu_gt && pointPolygonTest(finishButtonPts,Point2f(float(pt_lbu_gt.x),float(pt_lbu_gt.y)),false) > 0){
             lbu_gt = 0;
             if(vPtSignature.size()==0){
                 cout<<" There is no signature to draw...."<<endl;
             }else{
                 cout<<" The strokes of signature: "<<vPtSignature.size()<<endl;
-                operationMode=1;
-                cv::destroyWindow("Signature");
-
+                // operationMode=1;
+                // cv::destroyWindow("Signature");
                 std_msgs::String msg;
                 msg.data = string_convertor::constructPubStr(vPtSignature);
-              	pubTask.publish(msg);
+                pubTask.publish(msg);
             }
         }
     }
-
-    //cv::namedWindow("view");
-    //cv::startWindowThread();
-
-      //declaration of function
-  	//cv::destroyWindow("view");
     return 0;
 }
 
@@ -298,11 +336,10 @@ void CallBackFunc2(int event, int x, int y, int flags, void* userdata)
 
          ROS_INFO_STREAM("middle click down");
      }
-     else if  ( event == EVENT_MOUSEWHEEL )
-     {
-
-         ROS_INFO_STREAM("wheel button scroll");
-     }
+      else if ( event ==EVENT_MBUTTONUP)
+      {
+        ROS_INFO_STREAM("middle click up");
+      }
      else if ( event == EVENT_MOUSEMOVE )
      {
           //cout << "Mouse move over the window - position (" << x << ", " << y << ")" << endl;

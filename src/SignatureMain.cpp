@@ -175,7 +175,7 @@ int main(int argc, char* argv[]){
     for(;;){
         if(operationMode==0) //signature mode
         {
-           namedWindow("Signature",CV_WINDOW_AUTOSIZE);
+           namedWindow("Signature",CV_WINDOW_NORMAL);
            Mat tmp_paper = paper.clone();
            DrawButton(paper, resetButtonPts, finishButtonPts);//draw buttons
            setMouseCallback("Signature", CallBackFunc, &pt_lbd_gt);//get mouse events
@@ -216,7 +216,7 @@ int main(int argc, char* argv[]){
         }
         else
         {
-           namedWindow("Alignment",CV_WINDOW_AUTOSIZE);
+           namedWindow("Alignment",CV_WINDOW_NORMAL);
            cv::Mat operateImg=processOperateImg();
            imshow("Alignment", operateImg);
            setMouseCallback("Alignment", CallBackFunc2, NULL);
@@ -262,7 +262,7 @@ int main(int argc, char* argv[]){
                 // operationMode=1;
                 // cv::destroyWindow("Signature");
                 std_msgs::String msg;
-                msg.data = string_convertor::constructPubStr(vPtSignature);
+                msg.data = string_convertor::constructPubStr2(vPtSignature,10);
                 pubTask.publish(msg);
             }
         }

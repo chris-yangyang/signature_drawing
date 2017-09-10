@@ -83,3 +83,27 @@ string string_convertor::constructPubStr(vector< vector<Point> > vps)
    }
    return rtStr;
 }
+
+
+string string_convertor::constructPubStr2(vector< vector<Point> > vps, int gap)
+{
+  string rtStr="";
+  size_t strokesNum=vps.size();
+  for(int i=0;i<strokesNum;i++)
+  {
+     size_t pointsNum=vps[i].size();
+     if(pointsNum>0)
+     {
+       string thisLineStr="";
+       for(int j=0;j<pointsNum-1;j++)
+         if(j%gap==0||pointsNum<gap)
+              thisLineStr += d2s(vps[i][j].x)+" "+d2s(vps[i][j].y)+" ";
+       thisLineStr+=d2s(vps[i][pointsNum-1].x)+" "+d2s(vps[i][pointsNum-1].y);
+       if(i==strokesNum-1)
+         rtStr+=thisLineStr;
+       else
+         rtStr+=thisLineStr+";";
+     }
+  }
+  return rtStr;
+}

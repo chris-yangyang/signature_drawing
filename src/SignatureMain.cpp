@@ -26,7 +26,7 @@
 #include "transformation2D.h"
 using namespace cv;
 using namespace std;
-
+int downSamplingGap=20;
 int mbd_gt = 0;//mouse button down for finish current shape labeling
 int lbd_gt = 0;//mouse middle button dow-L lib -Wl,-rpath,'$$ORIGIN/lib'n for selecting edge fragments
 int lbu_gt = 0;
@@ -262,7 +262,7 @@ int main(int argc, char* argv[]){
                 // operationMode=1;
                 // cv::destroyWindow("Signature");
                 std_msgs::String msg;
-                msg.data = string_convertor::constructPubStr2(vPtSignature,10);
+                msg.data = string_convertor::constructPubStr2(vPtSignature,downSamplingGap);
                 pubTask.publish(msg);
             }
         }

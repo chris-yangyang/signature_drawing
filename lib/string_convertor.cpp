@@ -83,7 +83,12 @@ string string_convertor::constructPubStr(vector< vector<Point> > vps)
    }
    return rtStr;
 }
-
+double string_convertor::pointDistance(Point2f p1, Point2f p2)
+{
+  double deltax=p1.x-p2.x;
+  double deltay=p1.y-p2.y;
+  return sqrt(deltax*deltax+deltay*deltay);
+}
 
 string string_convertor::constructPubStr2(vector< vector<Point> > vps, int gap)
 {

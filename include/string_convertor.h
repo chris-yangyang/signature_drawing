@@ -32,6 +32,6 @@ class string_convertor
        static std::vector< double > fromString2Array(string inStr);
        static std::vector< string > fromString2ArrayStr(string inStr);
        static string constructPubStr(vector< vector<Point> > vps);
-
+       static double pointDistance(Point2f p1, Point2f P2);
        static string constructPubStr2(vector< vector<Point> > vps, int gap);
 };

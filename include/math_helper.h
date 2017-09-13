@@ -16,7 +16,7 @@ using namespace std;
 class math_helper
 {
     public:
-       math_helper(double b);
+       math_helper (double b);
        ~math_helper();
        double getPx(double x);
        double getRandX();

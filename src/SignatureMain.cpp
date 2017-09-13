@@ -26,7 +26,7 @@
 #include "transformation2D.h"
 using namespace cv;
 using namespace std;
-int downSamplingGap=20;
+int downSamplingGap=5;
 int mbd_gt = 0;//mouse button down for finish current shape labeling
 int lbd_gt = 0;//mouse middle button dow-L lib -Wl,-rpath,'$$ORIGIN/lib'n for selecting edge fragments
 int lbu_gt = 0;
@@ -196,7 +196,15 @@ int main(int argc, char* argv[]){
 
            if(drawFlag){
            if(pointPolygonTest(drawRegion,Point2f(float(pt_mv_gt.x),float(pt_mv_gt.y)),false) > 0){
-               vPtSigTmp.push_back(pt_mv_gt);
+             if(vPtSigTmp.size()==0)
+                 vPtSigTmp.push_back(pt_mv_gt);
+             else
+             {
+               Point2f previousPoint=vPtSigTmp[vPtSigTmp.size()-1];
+                double distP=string_convertor::pointDistance(pt_mv_gt, previousPoint);
+                if(distP>1)
+                  vPtSigTmp.push_back(pt_mv_gt);
+             }
            }
                //drawFlag = 0;
                if(vPtSigTmp.size()>1){
@@ -261,6 +269,7 @@ int main(int argc, char* argv[]){
                 cout<<" The strokes of signature: "<<vPtSignature.size()<<endl;
                 // operationMode=1;
                 // cv::destroyWindow("Signature");
+                cout<<"point num:"<<vPtSignature[0].size()<<endl;
                 std_msgs::String msg;
                 msg.data = string_convertor::constructPubStr2(vPtSignature,downSamplingGap);
                 pubTask.publish(msg);

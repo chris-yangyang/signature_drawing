@@ -94,9 +94,57 @@ string string_convertor::constructPubStr2(vector< vector<Point> > vps, int gap)
 {
   string rtStr="";
   size_t strokesNum=vps.size();
+
   for(int i=0;i<strokesNum;i++)
   {
-     size_t pointsNum=vps[i].size();
+    size_t pointsNum = vps[i].size();
+
+    //down sampling points by straight line approximation
+    string thisLineStr="";
+    if(1 == pointsNum){//strokes with only one pixel
+
+      thisLineStr +=d2s(vps[i][0].x)+" "+d2s(vps[i][0].y);
+
+    }else if(pointsNum < 5 && pointsNum > 1){//stroks with less than 5 pixels and more than 1
+
+      thisLineStr +=d2s(vps[i][0].x)+" "+d2s(vps[i][0].y)+" "+
+      d2s(vps[i][round((pointsNum-1)/2)].x)+" "+d2s(vps[i][round((pointsNum-1)/2)].y)+" "+
+      d2s(vps[i][pointsNum-1].x)+" "+d2s(vps[i][pointsNum-1].y);
+
+    }else if(pointsNum > 4){//strokes with more than 4 pixels
+
+      double sample_dist_tmp = 0;
+      for(int j = 0; j < pointsNum; j++){//count the distances from each pixel to the first one
+        if(0==j || sample_dist_tmp > 5){//store the first point//every 5 pixels do the downsampling
+          thisLineStr +=d2s(vps[i][j].x)+" "+d2s(vps[i][j].y)+" ";
+          sample_dist_tmp = 0;
+        }else{
+          sample_dist_tmp += sqrt(pow(double(vps[i][j].x)-double(vps[i][j-1].x),2)+
+          pow(double(vps[i][j].y)-double(vps[i][j-1].y),2));
+        }//end if 0==j
+      }//end for j
+      thisLineStr +=d2s(vps[i][pointsNum-1].x)+" "+d2s(vps[i][pointsNum-1].y);
+    }//end if pointsNum>4
+
+    if(i==strokesNum-1)
+      rtStr+=thisLineStr;
+    else
+      rtStr+=thisLineStr+";";
+
+
+/*    if(pointsNum > 2){
+      string thisLineStr="";
+      thisLineStr +=d2s(vps[i][0].x)+" "+d2s(vps[i][0].y)+" "+
+      d2s(vps[i][round(pointsNum/4)].x)+" "+d2s(vps[i][round(pointsNum/4)].y)+" "+
+      d2s(vps[i][round(pointsNum/2)].x)+" "+d2s(vps[i][round(pointsNum/2)].y)+" "+
+      d2s(vps[i][round(pointsNum*3/4)].x)+" "+d2s(vps[i][round(pointsNum*3/4)].y)+" "+
+      d2s(vps[i][pointsNum-1].x)+" "+d2s(vps[i][pointsNum-1].y);
+      if(i==strokesNum-1)
+        rtStr+=thisLineStr;
+      else
+        rtStr+=thisLineStr+";";
+    }*/
+    /* size_t pointsNum=vps[i].size();
      if(pointsNum>0)
      {
        string thisLineStr="";
@@ -108,7 +156,7 @@ string string_convertor::constructPubStr2(vector< vector<Point> > vps, int gap)
          rtStr+=thisLineStr;
        else
          rtStr+=thisLineStr+";";
-     }
+     }*/
   }
   return rtStr;
 }

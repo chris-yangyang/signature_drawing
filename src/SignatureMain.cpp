@@ -26,7 +26,7 @@
 #include "transformation2D.h"
 using namespace cv;
 using namespace std;
-int downSamplingGap=5;
+int downSamplingGap=1;
 int mbd_gt = 0;//mouse button down for finish current shape labeling
 int lbd_gt = 0;//mouse middle button dow-L lib -Wl,-rpath,'$$ORIGIN/lib'n for selecting edge fragments
 int lbu_gt = 0;

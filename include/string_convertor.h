@@ -26,7 +26,7 @@ class string_convertor
     public:
        string_convertor();
        ~string_convertor();
-       static string d2s(double d);
+       static string  d2s(double d);
        static std::vector<float> convert2Float(std::vector<double> v);
        static void printOutStdVector(std::vector<double> v);
        static std::vector< double > fromString2Array(string inStr);

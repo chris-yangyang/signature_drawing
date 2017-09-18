@@ -124,6 +124,8 @@ cv::Mat processOperateImg()
 //===========================MAIN FUNCTION START===========================
 
 int main(int argc, char* argv[]){
+  if(argc>1)
+     sscanf(argv[1],"%d",&downSamplingGap);
 
   ros::init(argc, argv, "signature_extractor");
   ros::NodeHandle nh;

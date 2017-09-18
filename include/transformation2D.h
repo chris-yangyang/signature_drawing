@@ -12,7 +12,7 @@ class transformation2D
       transformation2D();
       ~transformation2D();
       transformation2D(Point _t, double _scale, double _rotation);
-      Point2d doTransformation (Point2d p1);
+      Point2d doTransformation  (Point2d p1);
    private:
      Point t;
      double scale;
